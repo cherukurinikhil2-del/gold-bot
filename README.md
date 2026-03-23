@@ -1,5 +1,5 @@
 # 🏅 Gold FVG Signal Bot
-
+Bot is active.
 Monitors **XAUUSD (Gold)** for ICT-style FVG + IFVG trade setups and sends **two-stage Telegram alerts**. Runs automatically on **GitHub Actions** every 5 minutes — no server needed.
 
 ---
