@@ -1,8 +1,12 @@
 {
-  "alerted_fvg": [],
+  "alerted_fvg": [
+    "4563.90_4556.10_bearish"
+  ],
   "alerted_zone_entered": [
     "4563.90_4556.10_bearish"
   ],
-  "alerted_entry": [],
+  "alerted_entry": [
+    "4563.90_4556.10_bearish_4556.70"
+  ],
   "open_trades": []
 }
