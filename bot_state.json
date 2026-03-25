@@ -1,25 +1,6 @@
 {
-  "alerted_fvg": [
-    "4305.50_4233.80_bearish",
-    "4353.20_4317.10_bearish",
-    "4490.00_4474.80_bearish",
-    "4455.90_4394.00_bearish",
-    "4404.80_4394.00_bullish",
-    "4424.00_4416.10_bullish",
-    "4338.00_4283.00_bullish",
-    "4424.00_4376.90_bearish",
-    "4329.00_4326.40_bearish",
-    "4401.00_4375.40_bullish",
-    "4396.50_4390.70_bullish",
-    "4578.30_4572.80_bullish",
-    "4570.00_4380.10_bullish",
-    "4572.00_4380.10_bullish",
-    "4572.30_4380.10_bullish",
-    "4578.30_4566.60_bearish",
-    "4578.30_4572.70_bearish",
-    "4540.50_4492.30_bullish",
-    "4563.90_4556.10_bearish"
-  ],
+  "alerted_fvg": [],
+  "alerted_zone_entered": [],
   "alerted_entry": [],
   "open_trades": []
 }
