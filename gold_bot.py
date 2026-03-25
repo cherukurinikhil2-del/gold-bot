@@ -237,36 +237,47 @@ def check_open_trades(state: dict, df_5m: pd.DataFrame) -> dict:
     if not state.get("open_trades"):
         return state
 
-    current_high  = float(df_5m["High"].iloc[-1])
-    current_low   = float(df_5m["Low"].iloc[-1])
-    current_price = float(df_5m["Close"].iloc[-1])
-
     still_open = []
     for trade in state["open_trades"]:
         direction = trade["direction"]
         sl        = trade["sl"]
         tp        = trade["tp"]
+        entry_time = pd.Timestamp(trade.get("entry_time", df_5m.index[0]))
+        if entry_time.tzinfo is None:
+            entry_time = entry_time.tz_localize("UTC")
 
-        if direction == "short":
-            if current_high >= sl:
-                print(f"    🛑 SL hit on short trade @ ${sl:.2f}")
-                send_telegram(msg_alert3(trade, "sl", sl))
-                continue  # remove from open trades
-            elif current_low <= tp:
-                print(f"    🎯 TP hit on short trade @ ${tp:.2f}")
-                send_telegram(msg_alert3(trade, "tp", tp))
-                continue
+        # Only look at candles AFTER the entry time
+        df_after = df_5m[df_5m.index > entry_time]
+        
+        outcome = None
+        exit_price = None
+
+        # Iterate forward through time (same as backtest)
+        for t, c in df_after.iterrows():
+            h, l = float(c["High"]), float(c["Low"])
+            if direction == "short":
+                if h >= sl:
+                    outcome, exit_price = "loss", sl
+                    break
+                if l <= tp:
+                    outcome, exit_price = "win", tp
+                    break
+            else:
+                if l <= sl:
+                    outcome, exit_price = "loss", sl
+                    break
+                if h >= tp:
+                    outcome, exit_price = "win", tp
+                    break
+
+        if outcome == "loss":
+            print(f"    🛑 SL hit on {direction} trade @ ${sl:.2f}")
+            send_telegram(msg_alert3(trade, "sl", sl))
+        elif outcome == "win":
+            print(f"    🎯 TP hit on {direction} trade @ ${tp:.2f}")
+            send_telegram(msg_alert3(trade, "tp", tp))
         else:
-            if current_low <= sl:
-                print(f"    🛑 SL hit on long trade @ ${sl:.2f}")
-                send_telegram(msg_alert3(trade, "sl", sl))
-                continue
-            elif current_high >= tp:
-                print(f"    🎯 TP hit on long trade @ ${tp:.2f}")
-                send_telegram(msg_alert3(trade, "tp", tp))
-                continue
-
-        still_open.append(trade)
+            still_open.append(trade)
 
     state["open_trades"] = still_open
     return state
@@ -402,12 +413,13 @@ def run() -> None:
 
         # Save open trade for TP/SL monitoring
         state["open_trades"].append({
-            "entry":     round(entry, 2),
-            "sl":        round(sl, 2),
-            "tp":        round(tp, 2),
-            "rr":        round(rr, 2),
-            "direction": direction,
-            "entry_id":  eid,
+            "entry_time": str(df_5m.index[-1]),
+            "entry":      round(entry, 2),
+            "sl":         round(sl, 2),
+            "tp":         round(tp, 2),
+            "rr":         round(rr, 2),
+            "direction":  direction,
+            "entry_id":   eid,
         })
 
         save_state(state)
