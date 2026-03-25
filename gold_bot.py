@@ -62,7 +62,7 @@ def load_state() -> dict:
     if os.path.exists(STATE_FILE):
         with open(STATE_FILE) as f:
             return json.load(f)
-    return {"alerted_fvg": [], "alerted_entry": [], "open_trades": []}
+    return {"alerted_fvg": [], "alerted_zone_entered": [], "alerted_entry": [], "open_trades": []}
 
 
 def save_state(state: dict) -> None:
@@ -283,6 +283,8 @@ def run() -> None:
     state = load_state()
     if "open_trades" not in state:
         state["open_trades"] = []
+    if "alerted_zone_entered" not in state:
+        state["alerted_zone_entered"] = []
 
     try:
         df_1h = fetch("1h", "30d")
@@ -314,20 +316,22 @@ def run() -> None:
     for fvg in recent:
         fid = zone_key(fvg)
 
+        # Skip if already produced a trade — 1 FVG = 1 trade
+        if fid in state["alerted_fvg"]:
+            print(f"  ↳ FVG {fvg['bottom']:.2f}–{fvg['top']:.2f} already traded — skipped")
+            continue
+
         if not (fvg["bottom"] <= current_price <= fvg["top"]):
             continue
 
         print(f"  ✓ Price inside {fvg['direction']} FVG: {fvg['bottom']:.2f}–{fvg['top']:.2f}")
 
-        # Skip if already tapped — 1 FVG = 1 trade
-        if fid in state["alerted_fvg"]:
-            print("    ↳ FVG already tapped — permanently retired")
-            continue
-
-        # ALERT 1 — retire FVG permanently
-        send_telegram(msg_alert1(fvg, current_price))
-        state["alerted_fvg"].append(fid)
-        save_state(state)
+        # ALERT 1 — notify price entered FVG (but do NOT retire the FVG)
+        if fid not in state["alerted_zone_entered"]:
+            send_telegram(msg_alert1(fvg, current_price))
+            state["alerted_zone_entered"].append(fid)
+            state["alerted_zone_entered"] = state["alerted_zone_entered"][-100:]
+            save_state(state)
 
         # Trade direction
         direction       = "short" if fvg["direction"] == "bearish" else "long"
@@ -392,6 +396,9 @@ def run() -> None:
 
         state["alerted_entry"].append(eid)
         state["alerted_entry"] = state["alerted_entry"][-50:]
+
+        # NOW retire the FVG — trade confirmed (1 FVG = 1 trade)
+        state["alerted_fvg"].append(fid)
 
         # Save open trade for TP/SL monitoring
         state["open_trades"].append({
