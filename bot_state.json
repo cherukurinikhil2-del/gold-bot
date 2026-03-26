@@ -1,7 +1,8 @@
 {
   "alerted_fvg": [
     "4563.90_4556.10_bearish",
-    "4578.30_4573.20_bearish"
+    "4578.30_4573.20_bearish",
+    "4540.50_4492.30_bullish"
   ],
   "alerted_zone_entered": [
     "4563.90_4556.10_bearish",
@@ -12,7 +13,18 @@
   ],
   "alerted_entry": [
     "4563.90_4556.10_bearish_4556.70",
-    "4578.30_4573.20_bearish_4574.90"
+    "4578.30_4573.20_bearish_4574.90",
+    "4540.50_4492.30_bullish_4526.20"
   ],
-  "open_trades": []
+  "open_trades": [
+    {
+      "entry_time": "2026-03-26 01:25:00+00:00",
+      "entry": 4526.2,
+      "sl": 4523.4,
+      "tp": 4531.7,
+      "rr": 1.96,
+      "direction": "long",
+      "entry_id": "4540.50_4492.30_bullish_4526.20"
+    }
+  ]
 }
